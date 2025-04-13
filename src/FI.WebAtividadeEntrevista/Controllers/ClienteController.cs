@@ -41,8 +41,22 @@ namespace WebAtividadeEntrevista.Controllers
                 if (boCliente.VerificarExistencia(model.CPF))
                 {
                     Response.StatusCode = 400;
-                    return Json("Já existe um cliente cadastrado com esse CPF");
+                    return Json(new { Result = "ERROR", Message = "Já existe um cliente cadastrado com esse CPF" });
                 }
+
+                model.Id = boCliente.Incluir(new Cliente()
+                {
+                    CEP = model.CEP,
+                    Cidade = model.Cidade,
+                    Email = model.Email,
+                    Estado = model.Estado,
+                    Logradouro = model.Logradouro,
+                    Nacionalidade = model.Nacionalidade,
+                    Nome = model.Nome,
+                    Sobrenome = model.Sobrenome,
+                    Telefone = model.Telefone,
+                    CPF = model.CPF
+                });
 
                 if (model.Beneficiarios != null && model.Beneficiarios.Count > 0)
                 {
@@ -97,7 +111,7 @@ namespace WebAtividadeEntrevista.Controllers
                     if (model.Beneficiarios.Find(x => x.CPF == beneficiario.CPF && x.Id != beneficiario.Id) != null)
                     {
                         Response.StatusCode = 400;
-                        return Json($"Beneficiário com o CPF '{beneficiario.CPF}' já cadastrado para este cliente");
+                        return Json(new { Result = "ERROR", Message = $"Beneficiário com o CPF '{beneficiario.CPF}' já cadastrado para este cliente" });
                     }
                 }
 
@@ -152,7 +166,7 @@ namespace WebAtividadeEntrevista.Controllers
             catch (Exception ex)
             {
                 Response.StatusCode = 400;
-                return Json(ex.Message);
+                return Json(new { Result = "ERROR", Message = ex.Message });
             }
         }
 
@@ -190,6 +204,48 @@ namespace WebAtividadeEntrevista.Controllers
             }
 
             return View(model);
+        }
+
+
+        [HttpPost]
+        public ActionResult Deletar(long id)
+        {
+            try
+            {
+                List<Beneficiario> beneficiarios = new BoBeneficiario().ListarPorCliente(id);
+
+                if (beneficiarios != null && beneficiarios.Count > 0)
+                {
+                    Response.StatusCode = 400;
+                    return Json(new { Result = "ERROR", Message = "Não é possível excluir o cliente, pois existem beneficiários vinculados a ele" });
+                }
+
+                BoCliente boCliente = new BoCliente();
+                boCliente.Excluir(id);
+                
+                return Json(new { Result = "OK", Message = "Cliente excluído com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Result = "ERROR", Message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeletarBeneficiario(long id)
+        {
+            try
+            {
+                BoBeneficiario boBeneficiario = new BoBeneficiario();
+
+                boBeneficiario.Excluir(id);
+
+                return Json(new { Result = "OK", Message = "Beneficiário excluído com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Result = "ERROR", Message = $"Erro ao excluir beneficiário: {ex.Message}" });
+            }
         }
 
         [HttpPost]
