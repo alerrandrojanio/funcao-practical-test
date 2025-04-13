@@ -1,51 +1,94 @@
-﻿
-$(document).ready(function () {
-    if (obj) {
-        $('#formCadastro #Nome').val(obj.Nome);
-        $('#formCadastro #CEP').val(obj.CEP);
-        $('#formCadastro #Email').val(obj.Email);
-        $('#formCadastro #Sobrenome').val(obj.Sobrenome);
-        $('#formCadastro #Nacionalidade').val(obj.Nacionalidade);
-        $('#formCadastro #Estado').val(obj.Estado);
-        $('#formCadastro #Cidade').val(obj.Cidade);
-        $('#formCadastro #Logradouro').val(obj.Logradouro);
-        $('#formCadastro #Telefone').val(obj.Telefone);
-    }
+﻿$(document).ready(function () {
+    $('#CPF').mask('000.000.000-00', { reverse: true });
+    $('#CPFBeneficiario').mask('000.000.000-00', { reverse: true });
 
-    $('#formCadastro').submit(function (e) {
-        e.preventDefault();
-        
-        $.ajax({
-            url: urlPost,
-            method: "POST",
-            data: {
-                "NOME": $(this).find("#Nome").val(),
-                "CEP": $(this).find("#CEP").val(),
-                "Email": $(this).find("#Email").val(),
-                "Sobrenome": $(this).find("#Sobrenome").val(),
-                "Nacionalidade": $(this).find("#Nacionalidade").val(),
-                "Estado": $(this).find("#Estado").val(),
-                "Cidade": $(this).find("#Cidade").val(),
-                "Logradouro": $(this).find("#Logradouro").val(),
-                "Telefone": $(this).find("#Telefone").val()
-            },
-            error:
-            function (r) {
-                if (r.status == 400)
-                    ModalDialog("Ocorreu um erro", r.responseJSON);
-                else if (r.status == 500)
-                    ModalDialog("Ocorreu um erro", "Ocorreu um erro interno no servidor.");
-            },
-            success:
-            function (r) {
-                ModalDialog("Sucesso!", r)
-                $("#formCadastro")[0].reset();                                
-                window.location.href = urlRetorno;
-            }
+    if (obj) {
+        $('#formCadastroCliente #Nome').val(obj.Nome);
+        $('#formCadastroCliente #CEP').val(obj.CEP);
+        $('#formCadastroCliente #Email').val(obj.Email);
+        $('#formCadastroCliente #Sobrenome').val(obj.Sobrenome);
+        $('#formCadastroCliente #Nacionalidade').val(obj.Nacionalidade);
+        $('#formCadastroCliente #Estado').val(obj.Estado);
+        $('#formCadastroCliente #Cidade').val(obj.Cidade);
+        $('#formCadastroCliente #Logradouro').val(obj.Logradouro);
+        $('#formCadastroCliente #Telefone').val(obj.Telefone);
+        $('#formCadastroCliente #CPF').val(obj.CPF).mask('000.000.000-00');
+
+        $('#listaBeneficiarios tbody').empty();
+
+        $.each(obj.Beneficiarios, function (index, beneficiario) {
+            var novaLinha = `
+                <tr>
+                    <td class="hidden-xs hidden">${beneficiario.Id}</td>
+                    <td>${formatarCpf(beneficiario.CPF)}</td>
+                    <td>${beneficiario.Nome}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-primary btnAlterarBeneficiario" style="margin-right: 0.4rem">Alterar</button>
+                        <button type="button" class="btn btn-sm btn-danger btnExcluirBeneficiario">Excluir</button>
+                    </td>
+                </tr>
+            `;
+
+            $('#listaBeneficiarios tbody').append(novaLinha);
         });
-    })
-    
+
+        $('#formCadastroCliente').submit(function (event) {
+            event.preventDefault();
+            alterarCliente();   
+        });
+    }
 })
+
+function alterarCliente() {
+    var cliente = {
+        Nome: $('#formCadastroCliente #Nome').val(),
+        Sobrenome: $('#formCadastroCliente #Sobrenome').val(),
+        CPF: $('#formCadastroCliente #CPF').val(),
+        Nacionalidade: $('#formCadastroCliente #Nacionalidade').val(),
+        CEP: $('#formCadastroCliente #CEP').val(),
+        Estado: $('#formCadastroCliente #Estado').val(),
+        Cidade: $('#formCadastroCliente #Cidade').val(),
+        Logradouro: $('#formCadastroCliente #Logradouro').val(),
+        Email: $('#formCadastroCliente #Email').val(),
+        Telefone: $('#formCadastroCliente #Telefone').val(),
+        Beneficiarios: []
+    };
+
+    $('#listaBeneficiarios tbody tr').each(function () {
+        var beneficiario = {
+            Id: $(this).find('td:eq(0)').text().trim(),
+            CPF: $(this).find('td:eq(1)').text().trim(),
+            Nome: $(this).find('td:eq(2)').text().trim()
+        };
+        cliente.Beneficiarios.push(beneficiario);
+    });
+
+    $.ajax({
+        url: urlPost, 
+        type: 'POST',
+        data: JSON.stringify(cliente),
+        contentType: 'application/json',
+        success: function (result) {
+            const modalId = ModalDialog("Sucesso", "Cliente alterado com sucesso");
+
+            $('#' + modalId).on('hidden.bs.modal', function () {
+                window.location.href = urlRetorno;
+            });
+        },
+        error: function (error) {
+            ModalDialog("Erro", "Erro ao alterar cliente. Detalhes: " + error.responseText);
+        }
+    });
+}
+
+function formatarCpf(cpf) {
+    cpf = cpf.replace(/\D/g, ''); 
+
+    if (cpf.length !== 11)
+        return cpf; 
+
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+}
 
 function ModalDialog(titulo, texto) {
     var random = Math.random().toString().replace('.', '');
@@ -69,4 +112,6 @@ function ModalDialog(titulo, texto) {
 
     $('body').append(texto);
     $('#' + random).modal('show');
+
+    return random;
 }
