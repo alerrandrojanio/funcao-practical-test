@@ -2,6 +2,7 @@
 $(document).ready(function () {
     $('#CPF').mask('000.000.000-00', { reverse: true });
     $('#CPFBeneficiario').mask('000.000.000-00', { reverse: true });
+    $('#Telefone').mask('(00) 00000-0000');
 
     $('#formCadastroCliente').submit(function (event) {
         event.preventDefault();
@@ -13,7 +14,7 @@ function incluirCliente() {
     var cliente = {
         Nome: $('#formCadastroCliente #Nome').val(),
         Sobrenome: $('#formCadastroCliente #Sobrenome').val(),
-        CPF: $('#formCadastroCliente #CPF').val().mask('000.000.000-00'),
+        CPF: $('#formCadastroCliente #CPF').val(),
         Nacionalidade: $('#formCadastroCliente #Nacionalidade').val(),
         CEP: $('#formCadastroCliente #CEP').val(),
         Estado: $('#formCadastroCliente #Estado').val(),
@@ -47,7 +48,8 @@ function incluirCliente() {
             });
         },
         error: function (error) {
-            ModalDialog("Erro", "Erro ao incluir cliente. Detalhes: " + error.responseText);
+            const response = JSON.parse(error.responseText);
+            ModalDialog("Erro", "Erro ao incluir cliente. Detalhes: " + response.Message);
         }
     });
 }

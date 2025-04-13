@@ -1,6 +1,7 @@
 ﻿$(document).ready(function () {
     $('#CPF').mask('000.000.000-00', { reverse: true });
     $('#CPFBeneficiario').mask('000.000.000-00', { reverse: true });
+    $('#Telefone').mask('(00) 00000-0000');
 
     if (obj) {
         $('#formCadastroCliente #Nome').val(obj.Nome);
@@ -11,7 +12,7 @@
         $('#formCadastroCliente #Estado').val(obj.Estado);
         $('#formCadastroCliente #Cidade').val(obj.Cidade);
         $('#formCadastroCliente #Logradouro').val(obj.Logradouro);
-        $('#formCadastroCliente #Telefone').val(obj.Telefone);
+        $('#formCadastroCliente #Telefone').val(obj.Telefone).mask('(00) 00000-0000');
         $('#formCadastroCliente #CPF').val(obj.CPF).mask('000.000.000-00');
 
         $('#listaBeneficiarios tbody').empty();
@@ -76,18 +77,10 @@ function alterarCliente() {
             });
         },
         error: function (error) {
-            ModalDialog("Erro", "Erro ao alterar cliente. Detalhes: " + error.responseText);
+            const response = JSON.parse(error.responseText);
+            ModalDialog("Erro", "Erro ao alterar cliente. Detalhes: " + response.Message);
         }
     });
-}
-
-function formatarCpf(cpf) {
-    cpf = cpf.replace(/\D/g, ''); 
-
-    if (cpf.length !== 11)
-        return cpf; 
-
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 }
 
 function ModalDialog(titulo, texto) {
