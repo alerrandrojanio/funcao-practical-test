@@ -44,6 +44,17 @@ namespace WebAtividadeEntrevista.Controllers
                     return Json(new { Result = "ERROR", Message = "Já existe um cliente cadastrado com esse CPF" });
                 }
 
+                List<string> cpfsDuplicados = model.Beneficiarios.GroupBy(b => b.CPF)
+                                                                 .Where(g => g.Count() > 1)
+                                                                 .Select(g => g.Key)
+                                                                 .ToList();
+
+                if (cpfsDuplicados.Any())
+                {
+                    Response.StatusCode = 400;
+                    return Json(new { Result = "ERROR", Message = $"Existem beneficiários com o mesmo CPF: {string.Join(", ", cpfsDuplicados)}" });
+                }
+
                 model.Id = boCliente.Incluir(new Cliente()
                 {
                     CEP = model.CEP,
@@ -90,8 +101,6 @@ namespace WebAtividadeEntrevista.Controllers
         {
             try
             {
-                BoCliente bo = new BoCliente();
-
                 if (!this.ModelState.IsValid)
                 {
                     List<string> erros = (from item in ModelState.Values
@@ -102,7 +111,26 @@ namespace WebAtividadeEntrevista.Controllers
                     return Json(string.Join(Environment.NewLine, erros));
                 }
 
+                BoCliente boCliente = new BoCliente();
+
+                if (boCliente.VerificarExistencia(model.CPF))
+                {
+                    Response.StatusCode = 400;
+                    return Json(new { Result = "ERROR", Message = "Já existe um cliente cadastrado com esse CPF" });
+                }
+
                 BoBeneficiario boBeneficiario = new BoBeneficiario();
+
+                List<string> cpfsDuplicados = model.Beneficiarios.GroupBy(b => b.CPF)
+                                                                 .Where(g => g.Count() > 1)
+                                                                 .Select(g => g.Key)
+                                                                 .ToList();
+
+                if (cpfsDuplicados.Any())
+                {
+                    Response.StatusCode = 400;
+                    return Json(new { Result = "ERROR", Message = $"Existem beneficiários com o mesmo CPF: {string.Join(", ", cpfsDuplicados)}" });
+                }
 
                 List<Beneficiario> beneficiarios = boBeneficiario.ListarPorCliente(model.Id);
 
@@ -114,8 +142,6 @@ namespace WebAtividadeEntrevista.Controllers
                         return Json(new { Result = "ERROR", Message = $"Beneficiário com o CPF '{beneficiario.CPF}' já cadastrado para este cliente" });
                     }
                 }
-
-                BoCliente boCliente = new BoCliente();
 
                 boCliente.Alterar(new Cliente()
                 {
