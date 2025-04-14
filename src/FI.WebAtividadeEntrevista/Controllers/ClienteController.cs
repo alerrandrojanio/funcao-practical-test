@@ -33,7 +33,7 @@ namespace WebAtividadeEntrevista.Controllers
                                           select error.ErrorMessage).ToList();
 
                     Response.StatusCode = 400;
-                    return Json(string.Join(Environment.NewLine, erros));
+                    return Json(new { Result = "ERROR", Message = string.Join(Environment.NewLine, erros) });
                 }
 
                 BoCliente boCliente = new BoCliente();
@@ -108,7 +108,7 @@ namespace WebAtividadeEntrevista.Controllers
                                           select error.ErrorMessage).ToList();
 
                     Response.StatusCode = 400;
-                    return Json(string.Join(Environment.NewLine, erros));
+                    return Json(new { Result = "ERROR", Message = string.Join(Environment.NewLine, erros) });
                 }
 
                 BoBeneficiario boBeneficiario = new BoBeneficiario();
