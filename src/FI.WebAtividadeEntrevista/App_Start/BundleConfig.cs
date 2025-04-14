@@ -34,7 +34,8 @@ namespace FI.WebAtividadeEntrevista
                       "~/Scripts/Utils/FI.Utils.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/listClientes").Include(
-                      "~/Scripts/Clientes/FI.ListClientes.js"));
+                      "~/Scripts/Clientes/FI.ListClientes.js",
+                      "~/Scripts/Utils/FI.Utils.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/altClientes").Include(
                       "~/Scripts/Clientes/FI.AltClientes.js",

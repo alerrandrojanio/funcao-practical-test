@@ -51,19 +51,19 @@ $(document).ready(function () {
             data: { id: id },
             success: function (response) {
                 if (response.Result === "OK") {
-                    alert(response.Message);
+                    ModalDialog("Sucesso", response.Message);
                     location.reload();
                 } else {
-                    alert("Erro: " + response.Message);
+                    ModalDialog("Erro: " + response.Message);
                 }
             },
             error: function (response) {
                 if (response.status === 400) {
                     const mensagem = response.responseJSON?.Message || "Erro ao tentar excluir o cliente";
-                    alert(mensagem);
+                    ModalDialog("Erro", mensagem);
                 }
                 else
-                    alert("Ocorreu um erro inesperado.");
+                    ModalDialog("Erro", "Ocorreu um erro inesperado.");
             }
         });
     });

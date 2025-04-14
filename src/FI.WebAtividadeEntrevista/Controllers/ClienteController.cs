@@ -111,14 +111,6 @@ namespace WebAtividadeEntrevista.Controllers
                     return Json(string.Join(Environment.NewLine, erros));
                 }
 
-                BoCliente boCliente = new BoCliente();
-
-                if (boCliente.VerificarExistencia(model.CPF))
-                {
-                    Response.StatusCode = 400;
-                    return Json(new { Result = "ERROR", Message = "Já existe um cliente cadastrado com esse CPF" });
-                }
-
                 BoBeneficiario boBeneficiario = new BoBeneficiario();
 
                 List<string> cpfsDuplicados = model.Beneficiarios.GroupBy(b => b.CPF)
@@ -142,6 +134,8 @@ namespace WebAtividadeEntrevista.Controllers
                         return Json(new { Result = "ERROR", Message = $"Beneficiário com o CPF '{beneficiario.CPF}' já cadastrado para este cliente" });
                     }
                 }
+
+                BoCliente boCliente = new BoCliente();
 
                 boCliente.Alterar(new Cliente()
                 {
